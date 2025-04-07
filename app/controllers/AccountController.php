@@ -61,23 +61,24 @@ class AccountController {
 
     public function logout() { 
         unset($_SESSION['username']); 
-        unset($_SESSION['role']); 
+        unset($_SESSION['user_role']); 
+        unset($_SESSION['cart']); // Xóa giỏ hàng khỏi session
         header('Location: /webbanhang/product'); 
     } 
 
     public function checkLogin() { 
-        // Kiểm tra xem liệu form đã được submit
         if ($_SERVER['REQUEST_METHOD'] == 'POST') { 
+            session_start(); // Đảm bảo session được khởi tạo
             $username = $_POST['username'] ?? ''; 
             $password = $_POST['password'] ?? ''; 
-            $account = $this->accountModel->getAccountByUserName($username); 
+            $account = $this->accountModel->getAccountByUsername($username); 
 
             if ($account) { 
                 $pwd_hashed = $account->password; 
-                // Check mật khẩu
                 if (password_verify($password, $pwd_hashed)) { 
-                    session_start(); 
                     $_SESSION['username'] = $account->username; 
+                    $_SESSION['user_role'] = $account->role; 
+                    $_SESSION['user_id'] = $account->id; // Lưu user_id vào session
                     header('Location: /webbanhang/product'); 
                     exit; 
                 } else { 

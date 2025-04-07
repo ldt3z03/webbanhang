@@ -11,7 +11,7 @@ class AccountModel
 
     public function getAccountByUsername($username)
     {
-        $query = "SELECT * FROM account WHERE username = :username";
+        $query = "SELECT id, username, password, role FROM account WHERE username = :username";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $username, PDO::PARAM_STR);
         $stmt->execute();

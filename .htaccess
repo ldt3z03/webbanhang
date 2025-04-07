@@ -6,5 +6,6 @@
     RewriteRule ^(.*)$ app/index.php?url=$1 [L,QSA]
 </IfModule>
 
-# Test if .htaccess is working
-Redirect 301 /test /webbanhang/
+# Test if .htaccess is working (optional)
+# Uncomment the line below to test if .htaccess is functioning correctly
+# Redirect 301 /test /webbanhang/

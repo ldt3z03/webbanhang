@@ -36,6 +36,16 @@
         </select>
     </div>
     <div class="form-group">
+        <label for="brand_id">Thương hiệu:</label>
+        <select id="brand_id" name="brand_id" class="form-control" required>
+            <?php foreach ($brands as $brand): ?>
+                <option value="<?php echo $brand->id; ?>">
+                    <?php echo htmlspecialchars($brand->name, ENT_QUOTES, 'UTF-8'); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="form-group">
         <label for="image">Hình ảnh:</label>
         <input type="file" id="image" name="image" class="form-control">
     </div>

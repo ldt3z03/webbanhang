@@ -1,0 +1,69 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.navbar-brand img {
+    height: 50px;
+    margin-right: 15px;
+}
+
+.navbar-brand span {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.card {
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-title a {
+    text-decoration: none;
+    color: #333;
+}
+
+.card-title a:hover {
+    color: #007bff;
+}
+
+.card-footer {
+    text-align: center;
+}
+
+.product-card {
+    max-width: 250px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-image {
+    max-height: 150px;
+    object-fit: cover;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}

@@ -3,6 +3,8 @@
 require_once(__DIR__ . '/../config/database.php');
 require_once(__DIR__ . '/../models/ProductModel.php');
 require_once(__DIR__ . '/../models/CategoryModel.php');
+require_once(__DIR__ . '/../models/BrandModel.php');
+require_once(__DIR__ . '/../helpers/SessionHelper.php');
 
 class ProductController
 {
@@ -34,6 +36,7 @@ class ProductController
     public function add()
     {
         $categories = (new CategoryModel($this->db))->getCategories();
+        $brands = (new BrandModel($this->db))->getBrands(); // Lấy danh sách brand
         include_once __DIR__ . '/../views/product/add.php';
     }
 
@@ -66,6 +69,7 @@ class ProductController
     {
         $product = $this->productModel->getProductById($id);
         $categories = (new CategoryModel($this->db))->getCategories();
+        $brands = (new BrandModel($this->db))->getBrands(); // Lấy danh sách brand
         if ($product) {
             include __DIR__ . '/../views/product/edit.php';
         } else {
@@ -81,12 +85,12 @@ class ProductController
             $description = $_POST['description'];
             $price = $_POST['price'];
             $category_id = $_POST['category_id'];
-
+            $brand_id = $_POST['brand_id']; // Add brand_id
             $image = isset($_FILES['image']) && $_FILES['image']['error'] == 0
                 ? $this->uploadImage($_FILES['image'])
                 : $_POST['existing_image'];
 
-            $edit = $this->productModel->updateProduct($id, $name, $description, $price, $category_id, $image);
+            $edit = $this->productModel->updateProduct($id, $name, $description, $price, $category_id, $brand_id, $image);
 
             if ($edit) {
                 header('Location: /webbanhang/Product'); // Redirect to product list
@@ -137,34 +141,53 @@ class ProductController
 
     public function addToCart($id)
     {
+        if (!SessionHelper::isLoggedIn()) {
+            header('Location: /webbanhang/account/login');
+            return;
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            echo "Lỗi: Không tìm thấy user_id trong session.";
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
         $product = $this->productModel->getProductById($id);
+
         if (!$product) {
             echo "Không tìm thấy sản phẩm.";
             return;
         }
 
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]['quantity']++;
-        } else {
-            $_SESSION['cart'][$id] = [
-                'name' => $product->name,
-                'price' => $product->price,
-                'quantity' => 1,
-                'image' => $product->image
-            ];
-        }
+        $query = "INSERT INTO cart (user_id, product_id, quantity) 
+                  VALUES (:user_id, :product_id, 1)
+                  ON DUPLICATE KEY UPDATE quantity = quantity + 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':product_id', $id);
+        $stmt->execute();
 
         header('Location: /webbanhang/Product/cart');
     }
 
     public function cart()
     {
-        $cart = $_SESSION['cart'] ?? [];
-        include __DIR__ . '/../views/product/cart.php'; // Use absolute path
+        if (!SessionHelper::isLoggedIn()) {
+            header('Location: /webbanhang/account/login');
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $query = "SELECT c.product_id, c.quantity, p.name, p.price, p.image 
+                  FROM cart c
+                  JOIN product p ON c.product_id = p.id
+                  WHERE c.user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        $cart = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        include __DIR__ . '/../views/product/cart.php';
     }
 
     public function checkout()

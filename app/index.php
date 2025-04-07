@@ -11,7 +11,7 @@ $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 
 // Determine the controller from the first part of the URL
-$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'DefaultController';
+$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'ProductController';
 
 // Determine the action from the second part of the URL
 $action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
