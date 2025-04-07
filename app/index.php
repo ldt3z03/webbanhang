@@ -1,30 +1,35 @@
 <?php
 session_start();
-require_once __DIR__ . '/models/ProductModel.php';
 
+require_once __DIR__ . '/models/ProductModel.php';
+require_once __DIR__ . '/helpers/SessionHelper.php';
+
+// Product/add
 $url = $_GET['url'] ?? '';
 $url = rtrim($url, '/');
 $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 
-if (empty($url[0]) || $url[0] === '') {
-    $url[0] = 'Product'; // Mặc định chuyển đến controller Product
-    $url[1] = 'index';   // Mặc định action là index
-}
+// Determine the controller from the first part of the URL
+$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'DefaultController';
 
-$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'ProductController';
+// Determine the action from the second part of the URL
+$action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
 
+// Check if the controller file exists
 if (!file_exists(__DIR__ . '/controllers/' . $controllerName . '.php')) {
-    die("Controller not found: $controllerName");
+    // Handle controller not found
+    die('Controller not found');
 }
 
 require_once __DIR__ . '/controllers/' . $controllerName . '.php';
 $controller = new $controllerName();
 
-$action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
-
+// Check if the action method exists in the controller
 if (!method_exists($controller, $action)) {
-    die("Action not found: $action");
+    // Handle action not found
+    die('Action not found');
 }
 
+// Call the action with the remaining parameters (if any)
 call_user_func_array([$controller, $action], array_slice($url, 2));
