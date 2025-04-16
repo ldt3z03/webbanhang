@@ -19,6 +19,46 @@ class CategoryModel
 
         return $result;
     }
+
+    public function addCategory($name, $description = null)
+    {
+        $query = "INSERT INTO " . $this->table_name . " (name, description) VALUES (:name, :description)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+
+        return $stmt->execute();
+    }
+
+    public function getCategoryById($id)
+    {
+        $query = "SELECT id, name, description FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public function deleteCategory($id)
+    {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+
+        return $stmt->execute();
+    }
+
+    public function updateCategory($id, $name, $description = null)
+    {
+        $query = "UPDATE " . $this->table_name . " SET name = :name, description = :description WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+
+        return $stmt->execute();
+    }
 }
 
 ?>

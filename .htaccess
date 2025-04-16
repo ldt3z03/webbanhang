@@ -8,4 +8,4 @@
 
 # Test if .htaccess is working (optional)
 # Uncomment the line below to test if .htaccess is functioning correctly
-# Redirect 301 /test /webbanhang/
+Redirect 301 /test /webbanhang/

@@ -24,7 +24,11 @@ class ProductModel
 
     public function getProductById($id)
     {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
+        $query = "SELECT p.*, c.name as category_name, b.name as brand_name, b.logo as brand_logo
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN category c ON p.category_id = c.id
+                  LEFT JOIN brand b ON p.brand_id = b.id
+                  WHERE p.id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -52,13 +56,6 @@ class ProductModel
                   VALUES (:name, :description, :price, :category_id, :brand_id, :image)";
         $stmt = $this->conn->prepare($query);
 
-        $name = htmlspecialchars(strip_tags($name));
-        $description = htmlspecialchars(strip_tags($description));
-        $price = htmlspecialchars(strip_tags($price));
-        $category_id = htmlspecialchars(strip_tags($category_id));
-        $brand_id = htmlspecialchars(strip_tags($brand_id));
-        $image = htmlspecialchars(strip_tags($image));
-
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':description', $description);
         $stmt->bindParam(':price', $price);
@@ -66,10 +63,7 @@ class ProductModel
         $stmt->bindParam(':brand_id', $brand_id);
         $stmt->bindParam(':image', $image);
 
-        if ($stmt->execute()) {
-            return true;
-        }
-        return false;
+        return $stmt->execute();
     }
 
     public function updateProduct($id, $name, $description, $price, $category_id, $brand_id, $image)
@@ -80,13 +74,6 @@ class ProductModel
                   WHERE id = :id";
         $stmt = $this->conn->prepare($query);
 
-        $name = htmlspecialchars(strip_tags($name));
-        $description = htmlspecialchars(strip_tags($description));
-        $price = htmlspecialchars(strip_tags($price));
-        $category_id = htmlspecialchars(strip_tags($category_id));
-        $brand_id = htmlspecialchars(strip_tags($brand_id));
-        $image = htmlspecialchars(strip_tags($image));
-
         $stmt->bindParam(':id', $id);
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':description', $description);
@@ -95,10 +82,7 @@ class ProductModel
         $stmt->bindParam(':brand_id', $brand_id);
         $stmt->bindParam(':image', $image);
 
-        if ($stmt->execute()) {
-            return true;
-        }
-        return false;
+        return $stmt->execute();
     }
 
     public function deleteProduct($id)
@@ -107,10 +91,40 @@ class ProductModel
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
 
-        if ($stmt->execute()) {
-            return true;
+        return $stmt->execute();
+    }
+
+    public function searchProducts($query, $category = null, $brand = null)
+    {
+        $searchQuery = "%" . $query . "%";
+        $query = "SELECT p.id, p.name, p.description, p.price, p.image, 
+                         c.name as category_name, b.name as brand_name
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN category c ON p.category_id = c.id
+                  LEFT JOIN brand b ON p.brand_id = b.id
+                  WHERE (p.name LIKE :query OR p.description LIKE :query)";
+
+        if ($category) {
+            $query .= " AND c.id = :category";
         }
-        return false;
+
+        if ($brand) {
+            $query .= " AND b.id = :brand";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':query', $searchQuery);
+
+        if ($category) {
+            $stmt->bindParam(':category', $category);
+        }
+
+        if ($brand) {
+            $stmt->bindParam(':brand', $brand);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 }
 ?>

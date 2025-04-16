@@ -41,4 +41,51 @@ class AccountModel
         }
         return false;
     }
+
+    public function createAccount($data) {
+        $query = "INSERT INTO " . $this->table_name . " (username, email, password) 
+                  VALUES (:username, :email, :password)";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Sanitize data
+        $data['username'] = htmlspecialchars(strip_tags($data['username']));
+        $data['email'] = htmlspecialchars(strip_tags($data['email']));
+
+        // Bind data to the query
+        $stmt->bindParam(':username', $data['username']);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':password', $data['password']);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        }
+        return false;
+    }
+
+    public function emailExists($email) {
+        $query = "SELECT id FROM " . $this->table_name . " WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
+    }
+
+    public function getUserByEmail($email) {
+        $query = "SELECT id, username, email, password, role FROM " . $this->table_name . " WHERE email = :email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllAccounts() {
+        $query = "SELECT id, username, email, role FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 }

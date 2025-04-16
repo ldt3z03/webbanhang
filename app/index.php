@@ -16,6 +16,11 @@ $controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controll
 // Determine the action from the second part of the URL
 $action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
 
+// Redirect 'list' action to 'listAdmin' in ProductController
+if ($controllerName === 'ProductController' && $action === 'list') {
+    $action = 'listAdmin';
+}
+
 // Check if the controller file exists
 if (!file_exists(__DIR__ . '/controllers/' . $controllerName . '.php')) {
     // Handle controller not found
